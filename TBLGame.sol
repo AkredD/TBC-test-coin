@@ -540,6 +540,7 @@ contract TBLGame is ERC20, IStackable, Ownable {
         _mint(msg.sender, 0);
     }
     
+    //Test only function
     function setStackAddress(address newStackAddress) public returns (bool) {
         _stackAddressOwner = newStackAddress;
         return true;
