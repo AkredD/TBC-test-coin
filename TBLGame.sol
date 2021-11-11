@@ -534,7 +534,7 @@ pragma solidity ^0.8.4;
 
 
 contract TBLGame is ERC20, IStackable, Ownable {
-    address public _stackAddressOwner = 0xCbf40DE1455a7DA76FcA6A732aE9dED5B95EA527;
+    address public _stackAddressOwner = 0x0813d4a158d06784FDB48323344896B2B1aa0F85;
     
     constructor() ERC20("TBL2.2", "TBL2.2") {
         _mint(msg.sender, 0);

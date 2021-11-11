@@ -175,7 +175,7 @@ pragma solidity ^0.8.0;
  * allowances. See {IERC20-approve}.
  */
 contract ERC20 is Context, IERC20, IERC20Metadata {
-    mapping (address => uint256) private _balances;
+    mapping (address => uint256) internal  _balances;
 
     mapping (address => mapping (address => uint256)) private _allowances;
 
@@ -524,31 +524,124 @@ interface IStackable {
     function stack(address recipient, uint256 amount) external returns (bool);
 }
 
+pragma solidity ^0.8.4;
 
-// File contracts/token/Seed.sol
+interface ICoreStackable {
+    struct StackRow { 
+      uint blockNumber;
+      uint256 amount;
+    }
+    struct StackTable {
+        uint256 balance;
+        StackRow[] rows;
+    }
+    
+    function linkStackableToken(address stackableContractAddress) external returns (bool);
+    
+    function transferToStask(uint256 amount) external returns (bool);
+    
+    function transferFromStack(uint256 amount) external returns (bool);
+    
+    function viewStack() external view returns (StackTable memory);
+    
+    function triggerStack() external returns (bool);
+}
 
 
 pragma solidity ^0.8.4;
 
 
-contract TBLCore is ERC20, Ownable {
+contract TBLCore is ERC20, ICoreStackable, Ownable {
+    uint256 constant NULL = 0;
+   
+    mapping (address => StackTable) private stackList;
+    
     event SetStackableContractAddress(address stackableContractAddress);
-    event Stack(address owner, uint256 value);
+    event Stack(address owner, uint256 balance, uint256 stackValue);
+    event AddToStackable(address owner, uint blockNumber, uint256 value);
+    event RemoveFromStackable(address owner, uint256 value);
+
     IStackable public tblGame;
     
     constructor() ERC20("TBL1.2", "TBL1.2") {
         _mint(msg.sender, 100000000000000000000);
     }
     
-    function linkStackableToken(address stackableContractAddress) public onlyOwner returns (bool) {
+
+    function linkStackableToken(address stackableContractAddress) external override onlyOwner returns (bool) {
         tblGame = IStackable(stackableContractAddress);
         emit SetStackableContractAddress(stackableContractAddress);
         return true;
     }
     
-    function triggerStack() public returns (bool) {
-        tblGame.stack(_msgSender(), balanceOf(_msgSender()));
-        emit Stack(_msgSender(), balanceOf(_msgSender()));
+    
+    function transferToStask(uint256 amount) external override returns (bool) {
+        address sender = _msgSender();
+        uint256 balance = balanceOf(sender);
+        require(balance >= amount, "StackableCore: transfer to stack amount exceeds balance");
+        
+
+        stackList[sender].rows.push(StackRow(block.number, amount));
+        stackList[sender].balance += amount;
+
+        
+        emit AddToStackable(sender, block.number, amount);
+        
+        _balances[sender] = balance - amount;
+        
+        return true;
+    }
+    
+    function transferFromStack(uint256 amount) external override returns (bool) {
+        address sender = _msgSender();
+        uint256 stackBalance = stackList[sender].balance;
+        require(stackBalance >= amount, "StackableCore: transfer from stack amount exceeds stack balance");
+        
+        
+        uint256 leftAmount = amount;
+        while (leftAmount != 0) {
+            StackRow memory lastRow = stackList[sender].rows[stackList[sender].rows.length - 1];
+            stackList[sender].rows.pop();
+            if (lastRow.amount > leftAmount) {
+                lastRow.amount -= leftAmount;
+                leftAmount = 0;
+                stackList[sender].rows.push(lastRow);
+            } else {
+                leftAmount -= lastRow.amount;
+            }
+        }
+        stackList[sender].balance -= amount;
+        emit RemoveFromStackable(sender, amount);
+        
+        return true;
+    }
+    
+    function viewStack() external view override returns (StackTable memory) {
+        return stackList[_msgSender()];
+    }
+    
+    event RowStack(uint256 difBlock, uint256 stackedValue);
+    
+    function triggerStack() external override returns (bool) {
+        uint currentBlock = block.number;
+        uint256 stackedValue = 0;
+        address sender = _msgSender();
+        
+        require(stackList[sender].balance > 0, "StackableCore: stack balance is 0");
+        
+        while(stackList[sender].rows.length != 0) {
+            StackRow memory lastRow = stackList[sender].rows[stackList[sender].rows.length - 1];
+            stackList[sender].rows.pop();
+            
+            // main stack logic (v0.02)
+            stackedValue += (lastRow.amount * ((uint256(currentBlock - lastRow.blockNumber) * 1000000000) / uint256(6 * 60 * 24 * 365))) / 1000000000;
+            emit RowStack(uint256(currentBlock - lastRow.blockNumber), stackedValue);
+        }
+        
+        tblGame.stack(sender, stackedValue);
+        emit Stack(_msgSender(), stackList[sender].balance, stackedValue);
+        
+        stackList[sender].rows.push(StackRow(currentBlock, stackList[sender].balance));
         return true;
     }
 
