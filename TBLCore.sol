@@ -766,7 +766,7 @@ interface ITransfereWithLock {
 }
 
 
-abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata {
+abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata, Ownable {
     using SafeMath for uint256;
     
     uint256 private numTokensSellToAddToLiquidity = 12500 * 10**6 * 10**9;
@@ -776,6 +776,15 @@ abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata {
     
     bool inSwapAndLiquify;
     bool public swapAndLiquifyEnabled = true;
+    
+    mapping (address => uint256) internal  _balances;
+
+    mapping (address => mapping (address => uint256)) private _allowances;
+
+    uint256 private _totalSupply;
+
+    string private _name;
+    string private _symbol;
     
     event MinTokensBeforeSwapUpdated(uint256 minTokensBeforeSwap);
     event SwapAndLiquifyEnabledUpdated(bool enabled);
@@ -810,20 +819,16 @@ abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata {
         uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());
 
-        approve(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3, 10**19);
-
         uniswapV2Router = _uniswapV2Router;
     }
     
-    mapping (address => uint256) internal  _balances;
+    receive() external payable {}
 
-    mapping (address => mapping (address => uint256)) private _allowances;
 
-    uint256 private _totalSupply;
-
-    string private _name;
-    string private _symbol;
-
+    // test show
+    function pair() public view returns (address) {
+        return uniswapV2Pair;
+    }
 
     /**
      * @dev Returns the name of the token.
@@ -945,16 +950,19 @@ abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata {
         returns (
             uint256,
             uint256,
+            uint256,
             uint256
         )
     {
-        uint256 resultAmount = amount.mul(85).div(10**2);
+        uint256 resultAmount = amount.mul(80).div(10**2);
         uint256 liquidityFee = amount.mul(15).div(10**2);
         uint256 lifeFee = amount.mul(0).div(10**2);
+        uint256 burnFee = amount.mul(5).div(10**2);
         return (
             resultAmount,
             liquidityFee,
-            lifeFee
+            lifeFee,
+            burnFee
         );
     }
 
@@ -1064,18 +1072,22 @@ abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata {
         
         uint256 resultAmount = amount;
         
-        if (!inSwapAndLiquify) {
-            (uint256 transferAmount, uint256 liquidityFee, uint256 lifeFee) = _getValues(amount);
+        if (!inSwapAndLiquify &&
+            sender != uniswapV2Pair &&
+            sender != owner() &&
+            recipient != owner()) {
+            (uint256 transferAmount, uint256 liquidityFee, uint256 lifeFee, uint256 burnFee) = _getValues(amount);
             resultAmount = transferAmount;
-            
+            _burn(sender, burnFee);
             takeLiquidity(liquidityFee + lifeFee);
         }
         
-        _balances[sender] = senderBalance - resultAmount;
+        _balances[sender] = senderBalance - amount;
         _balances[recipient] += resultAmount;
 
         emit Transfer(sender, recipient, resultAmount);
     }
+    
 
     /** @dev Creates `amount` tokens and assigns them to `account`, increasing
      * the total supply.
@@ -1160,7 +1172,7 @@ abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata {
 
 
 
-contract TBLCore is ERC20WithLiquify, ICoreStackable, ITransfereWithLock, Ownable {
+contract TBLCore is ERC20WithLiquify, ICoreStackable, ITransfereWithLock {
     uint256 constant NULL = 0;
    
     mapping (address => StackTable) private stackList;
