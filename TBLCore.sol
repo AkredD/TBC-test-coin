@@ -765,35 +765,94 @@ interface ITransfereWithLock {
     function viewUnreceivedTransfersWithLock() external view returns (TransferLockRow[] memory);
 }
 
+interface IFee {
+    event SetLiquidityFee(uint liquidityFee);
+    event SetBurnFee(uint burnFee);
+    event SetLifeFee(uint lifeFee);
+    
+    function getAllFee() external view returns (uint);
+    
+    function setLiquidityFee(uint _liquidityFee) external;
+    
+    function setBurnFee(uint _burnFee) external;
+    
+    function setLifeFee(uint _lifeFee) external;
+}
 
-abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata, Ownable {
+interface ILife {
+    event SetLifeCompanies(LifeRow[] lifeCompanies);
+    
+    struct LifeRow {
+        address lifeAddress;
+        uint part;
+    }
+    
+    function setLifeCompanies(LifeRow[] memory lifeCompanies) external;
+
+    function getLifeCompamies() external view returns (LifeRow[] memory);
+}
+
+abstract contract Fee is Ownable, IFee {
+    uint public liquidityFee = 0; 
+    uint public burnFee = 5 * 10**3; 
+    uint public lifeFee = 0; 
+    
+    function getAllFee() external override view returns (uint) {
+        return liquidityFee + burnFee + lifeFee;
+    }
+    
+    function setLiquidityFee(uint _liquidityFee) external onlyOwner override {
+        require(checkLimitFee(_liquidityFee, burnFee, lifeFee), "Expire fee limit");
+        liquidityFee = _liquidityFee;
+        emit SetLiquidityFee(_liquidityFee);
+    }
+    
+    function setBurnFee(uint _burnFee) external onlyOwner override {
+        require(checkLimitFee(liquidityFee, _burnFee, lifeFee), "Expire fee limit");
+        burnFee = _burnFee;
+        emit SetBurnFee(_burnFee);
+    }
+    
+    function setLifeFee(uint _lifeFee) external onlyOwner override {
+        require(checkLimitFee(liquidityFee, burnFee, _lifeFee), "Expire fee limit");
+        lifeFee = _lifeFee;
+        emit SetLifeFee(_lifeFee);
+    }
+    
+    function checkLimitFee(uint _liquidityFee, uint _burnFee, uint _lifeFee) private pure returns (bool) {
+        return _liquidityFee + _burnFee + _lifeFee <= 5 * 10**3;
+    }
+}
+
+abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metadata {
     using SafeMath for uint256;
     
-    uint256 private numTokensSellToAddToLiquidity = 12500 * 10**6 * 10**9;
-    
-    IUniswapV2Router02 public immutable uniswapV2Router;
-    address public immutable uniswapV2Pair;
-    
-    bool inSwapAndLiquify;
-    bool public swapAndLiquifyEnabled = true;
-    
-    mapping (address => uint256) internal  _balances;
-
-    mapping (address => mapping (address => uint256)) private _allowances;
-
-    uint256 private _totalSupply;
-
-    string private _name;
-    string private _symbol;
-    
     event MinTokensBeforeSwapUpdated(uint256 minTokensBeforeSwap);
-    event SwapAndLiquifyEnabledUpdated(bool enabled);
     event SwapAndLiquify(
         uint256 tokensSwapped,
         uint256 ethReceived,
         uint256 tokensIntoLiqudity
     );
     
+    uint256 private numTokensSellToAddToLiquidity = 12500 * 10**6 * 10**9;
+    
+    IUniswapV2Router02 public immutable uniswapV2Router;
+    address public immutable uniswapV2Pair;
+    
+
+    mapping (address => uint256) internal  _balances;
+
+    mapping (address => mapping (address => uint256)) private _allowances;
+    
+    LifeRow[] private lifeCompanies;
+
+    uint256 private _totalSupply;
+
+    string private _name;
+    string private _symbol;
+    
+    
+    bool inSwapAndLiquify;
     modifier lockTheSwap {
         inSwapAndLiquify = true;
         _;
@@ -875,7 +934,28 @@ abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata, Ownable {
     function balanceOf(address account) public view virtual override returns (uint256) {
         return _balances[account];
     }
+    
+    
+    function setLifeCompanies(LifeRow[] memory _lifeCompanies) external override onlyOwner {
+        delete lifeCompanies;
+        if (_lifeCompanies.length == 0) {
+            return;
+        }
+        
+        uint totalPercent = 0;
+        for (uint i = 0; i < _lifeCompanies.length; i++) {
+            lifeCompanies.push(_lifeCompanies[i]);
+            totalPercent += _lifeCompanies[i].part;
+        }
+        
+        require(totalPercent == 100, "Sum of part is not equal to 100 percent");
+        emit SetLifeCompanies(lifeCompanies);
+    }
 
+    function getLifeCompamies() external view override returns (LifeRow[] memory) {
+        return lifeCompanies;
+    }
+    
     /**
      * @dev See {IERC20-transfer}.
      *
@@ -889,14 +969,25 @@ abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata, Ownable {
         return true;
     }
     
-    function takeLiquidity(uint256 liquidity) private {
+    function takeLife(address from, uint256 lifeFee) private {
+        for (uint i = 0; i < lifeCompanies.length; i++) {
+            uint256 lifeFeePart = lifeFee.mul(lifeCompanies[i].part).div(100);
+            address lifeAddress = lifeCompanies[i].lifeAddress;
+            
+            _balances[lifeAddress] += lifeFeePart;
+            emit Transfer(from, lifeAddress, lifeFeePart);
+        }
+    }
+    
+    function takeLiquidity(address from, uint256 liquidity) private {
         uint256 contractTokenBalance = _balances[address(this)];
-        
-        _balances[address(this)] = contractTokenBalance.add(liquidity);
         
         if (contractTokenBalance >= numTokensSellToAddToLiquidity) {
             swapAndLiquify(numTokensSellToAddToLiquidity);
         }
+        
+        _balances[address(this)] = _balances[address(this)] + liquidity;
+        emit Transfer(from, address(this), liquidity);
     }
     
     function swapAndLiquify(uint256 contractTokenBalance) private lockTheSwap {
@@ -946,7 +1037,7 @@ abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata, Ownable {
     
     function _getValues(uint256 amount)
         private
-        pure
+        view
         returns (
             uint256,
             uint256,
@@ -954,15 +1045,15 @@ abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata, Ownable {
             uint256
         )
     {
-        uint256 resultAmount = amount.mul(80).div(10**2);
-        uint256 liquidityFee = amount.mul(15).div(10**2);
-        uint256 lifeFee = amount.mul(0).div(10**2);
-        uint256 burnFee = amount.mul(5).div(10**2);
+        uint256 _resultAmount = amount.mul(10**5 - liquidityFee - lifeFee - burnFee).div(10**5);
+        uint256 _liquidityFeeAmount = amount.mul(liquidityFee).div(10**5);
+        uint256 _lifeFeeAmount = amount.mul(lifeFee).div(10**5);
+        uint256 _burnFeeAmount = amount.mul(burnFee).div(10**5);
         return (
-            resultAmount,
-            liquidityFee,
-            lifeFee,
-            burnFee
+            _resultAmount,
+            _liquidityFeeAmount,
+            _lifeFeeAmount,
+            _burnFeeAmount
         );
     }
 
@@ -1065,7 +1156,6 @@ abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata, Ownable {
         require(sender != address(0), "ERC20: transfer from the zero address");
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
-        _beforeTokenTransfer(sender, recipient, amount);
 
         uint256 senderBalance = _balances[sender];
         require(senderBalance >= amount, "ERC20: transfer amount exceeds balance");
@@ -1076,16 +1166,30 @@ abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata, Ownable {
             sender != uniswapV2Pair &&
             sender != owner() &&
             recipient != owner()) {
-            (uint256 transferAmount, uint256 liquidityFee, uint256 lifeFee, uint256 burnFee) = _getValues(amount);
+            (uint256 transferAmount, uint256 _liquidityFee, uint256 _lifeFee, uint256 _burnFee) = _getValues(amount);
             resultAmount = transferAmount;
-            _burn(sender, burnFee);
-            takeLiquidity(liquidityFee + lifeFee);
+            
+            if (_burnFee != 0) {
+                _burn(sender, _burnFee);
+            }
+            
+            if (_liquidityFee != 0) {
+                takeLiquidity(sender, _liquidityFee);
+            }
+            
+            if (_lifeFee != 0) {
+                takeLife(sender, _lifeFee);
+            }
         }
         
-        _balances[sender] = senderBalance - amount;
-        _balances[recipient] += resultAmount;
+        _transfer(sender, recipient, amount, resultAmount);
+    }
+    
+    function _transfer(address sender, address recipient, uint256 credit, uint256 debit) internal virtual {
+        _balances[sender] -= credit;
+        _balances[recipient] += debit;
 
-        emit Transfer(sender, recipient, resultAmount);
+        emit Transfer(sender, recipient, debit);
     }
     
 
@@ -1100,8 +1204,6 @@ abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata, Ownable {
      */
     function _mint(address account, uint256 amount) internal virtual {
         require(account != address(0), "ERC20: mint to the zero address");
-
-        _beforeTokenTransfer(address(0), account, amount);
 
         _totalSupply += amount;
         _balances[account] += amount;
@@ -1121,8 +1223,6 @@ abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata, Ownable {
      */
     function _burn(address account, uint256 amount) internal virtual {
         require(account != address(0), "ERC20: burn from the zero address");
-
-        _beforeTokenTransfer(account, address(0), amount);
 
         uint256 accountBalance = _balances[account];
         require(accountBalance >= amount, "ERC20: burn amount exceeds balance");
@@ -1152,27 +1252,11 @@ abstract contract ERC20WithLiquify is Context, IERC20, IERC20Metadata, Ownable {
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }
-
-    /**
-     * @dev Hook that is called before any transfer of tokens. This includes
-     * minting and burning.
-     *
-     * Calling conditions:
-     *
-     * - when `from` and `to` are both non-zero, `amount` of ``from``'s tokens
-     * will be to transferred to `to`.
-     * - when `from` is zero, `amount` tokens will be minted for `to`.
-     * - when `to` is zero, `amount` of ``from``'s tokens will be burned.
-     * - `from` and `to` are never both zero.
-     *
-     * To learn more about hooks, head to xref:ROOT:extending-contracts.adoc#using-hooks[Using Hooks].
-     */
-    function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual { }
 }
 
 
 
-contract TBLCore is ERC20WithLiquify, ICoreStackable, ITransfereWithLock {
+contract TBLCore is ERC20WithComission, ICoreStackable, ITransfereWithLock {
     uint256 constant NULL = 0;
    
     mapping (address => StackTable) private stackList;
@@ -1182,11 +1266,11 @@ contract TBLCore is ERC20WithLiquify, ICoreStackable, ITransfereWithLock {
     IStackable public tblGame;
     
     
-    constructor() ERC20WithLiquify("TBL", "TBL") {
-        _mint(msg.sender, 190 * 10**20);
+    constructor() ERC20WithComission("TinyBlustCore", "TBLC") {
+        _mint(msg.sender, 10**6 * 10**18);
     }
     
-     function transferWithLock(address recipient, uint256 amount, uint blockNumber) external override returns (bool) {
+    function transferWithLock(address recipient, uint256 amount, uint blockNumber) external override returns (bool) {
         address sender = _msgSender();
         uint256 balance = balanceOf(sender);
         require(balance >= amount, "TransferWithLockCore: transfer with lock amount exceeds balance");
@@ -1196,9 +1280,9 @@ contract TBLCore is ERC20WithLiquify, ICoreStackable, ITransfereWithLock {
         emit CreateTransferWithLock(sender, recipient, amount, blockNumber);
         
         return true;
-     }
+    }
      
-     function receiveLockedTransfers() external override returns (uint256) {
+    function receiveLockedTransfers() external override returns (uint256) {
         address sender = _msgSender();
         uint currentBlock = block.number;
         uint256 receivedAmount = 0;
@@ -1216,9 +1300,9 @@ contract TBLCore is ERC20WithLiquify, ICoreStackable, ITransfereWithLock {
         emit UnlockTransfers(sender, receivedAmount);
         
         return 0;   
-     }
+    }
      
-     function viewUnreceivedTransfersWithLock() external view override returns (TransferLockRow[] memory) {
+    function viewUnreceivedTransfersWithLock() external view override returns (TransferLockRow[] memory) {
         address sender = _msgSender();
         
         uint unreceivedSize;
@@ -1239,7 +1323,7 @@ contract TBLCore is ERC20WithLiquify, ICoreStackable, ITransfereWithLock {
         }
         
         return unreceivedRows;
-     }
+    }
     
 
     function linkStackableToken(address stackableContractAddress) external override onlyOwner returns (bool) {
