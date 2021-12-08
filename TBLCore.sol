@@ -83,7 +83,7 @@ contract TBLCore is ERC20WithComission, ICoreStackable, ITransfereWithLock {
     IStackable public tblGame;
     
     
-    constructor() ERC20WithComission("TinyBlustCore", "TBLC") {
+    constructor() ERC20WithComission("TinyBlastCore", "TBLC") {
         _mint(msg.sender, 2* 10**9 * 10**18);
     }
 

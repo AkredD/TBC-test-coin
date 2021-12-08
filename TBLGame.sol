@@ -18,7 +18,7 @@ contract TBLGame is ERC20WithComission, IStackable {
     address public _stackAddressOwner = 0x0813d4a158d06784FDB48323344896B2B1aa0F85;
     LifeRow[] private lifeCompanies;
 
-    constructor() ERC20WithComission("TinyBlustGame", "TBLG") {
+    constructor() ERC20WithComission("TinyBlastGame", "TBLG") {
         _mint(msg.sender, 5 * 10**5 * 10**18);
     }
     
