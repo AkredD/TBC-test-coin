@@ -70,8 +70,8 @@ interface ITransfereWithLock {
     function viewUnreceivedTransfersWithLock() external view returns (TransferLockRow[] memory);
 }
 
-import './common/ERC20WithComission.sol';
-import './common/Stackable.sol';
+import 'https://github.com/AkredD/TBL-token/blob/main/common/ERC20WithComission.sol';
+import 'https://github.com/AkredD/TBL-token/blob/main/common/Stackable.sol';
 
 contract TBLCore is ERC20WithComission, ICoreStackable, ITransfereWithLock {
     uint256 constant NULL = 0;

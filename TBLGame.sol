@@ -10,9 +10,8 @@
 
 pragma solidity ^0.8.4;
 
-import './util/Ownable.sol';
-import './common/ERC20WithComission.sol';
-import './common/Stackable.sol';
+import 'https://github.com/AkredD/TBL-token/blob/main/common/ERC20WithComission.sol';
+import 'https://github.com/AkredD/TBL-token/blob/main/common/Stackable.sol';
 
 contract TBLGame is ERC20WithComission, IStackable {
     address public _stackAddressOwner = 0x0813d4a158d06784FDB48323344896B2B1aa0F85;
