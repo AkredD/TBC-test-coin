@@ -156,11 +156,8 @@ import './Life.sol';
 import './Fee.sol';
 import '../uniswap/IUniswapV2Router02.sol';
 import '../uniswap/IUniswapV2Factory.sol';
-import '../util/SafeMath.sol';
 
-abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metadata {
-    using SafeMath for uint256;
-    
+abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metadata {    
     event MinTokensBeforeSwapUpdated(uint256 minTokensBeforeSwap);
     event SwapAndLiquify(
         uint256 tokensSwapped,
@@ -309,7 +306,7 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
     
     function takeLife(address from, uint256 lifeFee) private {
         for (uint i = 0; i < lifeCompanies.length; i++) {
-            uint256 lifeFeePart = lifeFee.mul(lifeCompanies[i].part).div(100);
+            uint256 lifeFeePart = (lifeFee * lifeCompanies[i].part) / (100);
             address lifeAddress = lifeCompanies[i].lifeAddress;
             
             _balances[lifeAddress] += lifeFeePart;
@@ -329,14 +326,14 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
     }
     
     function swapAndLiquify(uint256 contractTokenBalance) private lockTheSwap {
-        uint256 half = contractTokenBalance.div(2);
-        uint256 otherHalf = contractTokenBalance.sub(half);
+        uint256 half = contractTokenBalance / 2;
+        uint256 otherHalf = contractTokenBalance - half;
 
         uint256 initialBalance = address(this).balance;
 
         swapTokensForEth(half);
 
-        uint256 newBalance = address(this).balance.sub(initialBalance);
+        uint256 newBalance = address(this).balance - initialBalance;
 
         addLiquidity(otherHalf, newBalance);
 
@@ -383,10 +380,10 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
             uint256
         )
     {
-        uint256 _resultAmount = amount.mul(10**5 - liquidityFee - lifeFee - burnFee).div(10**5);
-        uint256 _liquidityFeeAmount = amount.mul(liquidityFee).div(10**5);
-        uint256 _lifeFeeAmount = amount.mul(lifeFee).div(10**5);
-        uint256 _burnFeeAmount = amount.mul(burnFee).div(10**5);
+        uint256 _resultAmount = (amount * (10**5 - liquidityFee - lifeFee - burnFee)) / 10**5;
+        uint256 _liquidityFeeAmount = (amount * liquidityFee) / 10**5;
+        uint256 _lifeFeeAmount = (amount * lifeFee) / 10**5;
+        uint256 _burnFeeAmount =(amount * burnFee) / 10**5;
         return (
             _resultAmount,
             _liquidityFeeAmount,

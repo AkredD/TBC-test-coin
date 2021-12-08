@@ -8,7 +8,7 @@
 
 // SPDX-License-Identifier: MIT
 
-pragma solidity ^0.8.4;
+
 
 interface ICoreStackable {
     event SetStackableContractAddress(address stackableContractAddress);
@@ -69,6 +69,8 @@ interface ITransfereWithLock {
     
     function viewUnreceivedTransfersWithLock() external view returns (TransferLockRow[] memory);
 }
+
+pragma solidity ^0.8.4;
 
 import 'https://github.com/AkredD/TBL-token/blob/main/common/ERC20WithComission.sol';
 import 'https://github.com/AkredD/TBL-token/blob/main/common/Stackable.sol';
