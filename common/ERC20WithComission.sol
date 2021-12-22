@@ -1,14 +1,4 @@
-/**
- *Submitted for verification at BscScan.com on 2021-06-09
-*/
-
-// Sources flattened with hardhat v2.2.1 https://hardhat.org
-
-// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v4.1.0
-
 // SPDX-License-Identifier: MIT
-
-// File @openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol@v4.1.0
 
 
 pragma solidity ^0.8.0;
@@ -208,9 +198,9 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
         IUniswapV2Router02 _uniswapV2Router =
             IUniswapV2Router02(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
 
-        //uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
-        //    .createPair(address(this), _uniswapV2Router.WETH());
-        uniswapV2Pair = 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3;
+        uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
+            .createPair(address(this), _uniswapV2Router.WETH());
+        //uniswapV2Pair = 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3;
         uniswapV2Router = _uniswapV2Router;
 
         excludeAddressFeeFrom[owner()] = true;
