@@ -9,33 +9,6 @@
 // SPDX-License-Identifier: MIT
 
 
-
-interface ICoreStackable {
-    event SetStackableContractAddress(address stackableContractAddress);
-    event Stack(address owner, uint256 balance, uint256 stackValue);
-    event AddToStackable(address owner, uint blockNumber, uint256 value);
-    event RemoveFromStackable(address owner, uint256 value);
-    
-    struct StackRow { 
-      uint blockNumber;
-      uint256 amount;
-    }
-    struct StackTable {
-        uint256 balance;
-        StackRow[] rows;
-    }
-    
-    function linkStackableToken(address stackableContractAddress) external returns (bool);
-    
-    function transferToStask(uint256 amount) external returns (bool);
-    
-    function transferFromStack(uint256 amount) external returns (bool);
-    
-    function viewStack() external view returns (StackTable memory);
-    
-    function triggerStack() external returns (bool);
-}
-
 interface ITransfereWithLock {
     event CreateTransferWithLock(address sender, address recipient, uint256 amount, uint blockTimestamp, uint blockSeconds);
     event UnlockTransfers(address recipient, uint256 amount);
@@ -73,16 +46,12 @@ interface ITransfereWithLock {
 pragma solidity ^0.8.4;
 
 import './common/ERC20WithComission.sol';
-import './common/Stackable.sol';
+import './common/StackCore.sol';
 
-contract TBLCore is ERC20WithComission, ICoreStackable, ITransfereWithLock {
+contract TBLCore is ERC20WithComission, StackCore, ITransfereWithLock {
     uint256 constant NULL = 0;
    
-    mapping (address => StackTable) private stackList;
     mapping (address => TransferLockTable) private lockedTransfers;
-    
-
-    IStackable public tblGame;
     
     
     constructor() ERC20WithComission("TinyBlastCore", "TBLC") {
@@ -164,79 +133,25 @@ contract TBLCore is ERC20WithComission, ICoreStackable, ITransfereWithLock {
         return unreceivedRows;
     }
     
-
-    function linkStackableToken(address stackableContractAddress) external override onlyOwner returns (bool) {
-        tblGame = IStackable(stackableContractAddress);
-        emit SetStackableContractAddress(stackableContractAddress);
-        return true;
-    }
     
     
-    function transferToStask(uint256 amount) external override returns (bool) {
+    function transferToStask(uint256 amount) external  {
         address sender = _msgSender();
         uint256 balance = balanceOf(sender);
         require(balance >= amount, "StackableCore: transfer to stack amount exceeds balance");
         
-
-        stackList[sender].rows.push(StackRow(block.number, amount));
-        stackList[sender].balance += amount;
-
+        //StackCore function
+        addToStack(amount, sender);
         
-        emit AddToStackable(sender, block.number, amount);
-        
-        _balances[sender] = balance - amount;
-        
-        return true;
+        _balances[sender] -= amount;
     }
     
-    function transferFromStack(uint256 amount) external override returns (bool) {
-        address sender = _msgSender();
-        uint256 stackBalance = stackList[sender].balance;
-        require(stackBalance >= amount, "StackableCore: transfer from stack amount exceeds stack balance");
-        
-        
-        uint256 leftAmount = amount;
-        while (leftAmount != 0) {
-            StackRow memory lastRow = stackList[sender].rows[stackList[sender].rows.length - 1];
-            stackList[sender].rows.pop();
-            if (lastRow.amount > leftAmount) {
-                lastRow.amount -= leftAmount;
-                leftAmount = 0;
-                stackList[sender].rows.push(lastRow);
-            } else {
-                leftAmount -= lastRow.amount;
-            }
-        }
-        stackList[sender].balance -= amount;
-        emit RemoveFromStackable(sender, amount);
-        
-        return true;
-    }
-    
-    function viewStack() external view override returns (StackTable memory) {
-        return stackList[_msgSender()];
-    }
-    
-    function triggerStack() external override returns (bool) {
-        uint currentBlock = block.number;
-        uint256 stackedValue = 0;
+    function transferFromStack(uint256 amount) external {
         address sender = _msgSender();
         
-        require(stackList[sender].balance > 0, "StackableCore: stack balance is 0");
-        
-        while(stackList[sender].rows.length != 0) {
-            StackRow memory lastRow = stackList[sender].rows[stackList[sender].rows.length - 1];
-            stackList[sender].rows.pop();
-            
-            // main stack logic (v0.02)
-            stackedValue += (lastRow.amount * ((uint256(currentBlock - lastRow.blockNumber) * 1000000000) / uint256(6 * 60 * 24 * 365))) / 1000000000;
-        }
-        
-        tblGame.stack(sender, stackedValue);
-        emit Stack(_msgSender(), stackList[sender].balance, stackedValue);
-        
-        stackList[sender].rows.push(StackRow(currentBlock, stackList[sender].balance));
-        return true;
-    }
+        //StackCore function
+        removeFromStack(amount, sender);
 
+        _balances[sender]+= amount;
+    }
 }

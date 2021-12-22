@@ -208,9 +208,9 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
         IUniswapV2Router02 _uniswapV2Router =
             IUniswapV2Router02(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
 
-        uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
-            .createPair(address(this), _uniswapV2Router.WETH());
-        //uniswapV2Pair = 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3;
+        //uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
+        //    .createPair(address(this), _uniswapV2Router.WETH());
+        uniswapV2Pair = 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3;
         uniswapV2Router = _uniswapV2Router;
 
         excludeAddressFeeFrom[owner()] = true;
