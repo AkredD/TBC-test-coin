@@ -72,8 +72,8 @@ interface ITransfereWithLock {
 
 pragma solidity ^0.8.4;
 
-import 'https://github.com/AkredD/TBL-token/blob/main/common/ERC20WithComission.sol';
-import 'https://github.com/AkredD/TBL-token/blob/main/common/Stackable.sol';
+import './common/ERC20WithComission.sol';
+import './common/Stackable.sol';
 
 contract TBLCore is ERC20WithComission, ICoreStackable, ITransfereWithLock {
     uint256 constant NULL = 0;
@@ -86,7 +86,7 @@ contract TBLCore is ERC20WithComission, ICoreStackable, ITransfereWithLock {
     
     
     constructor() ERC20WithComission("TinyBlastCore", "TBLC") {
-        _mint(msg.sender, 2* 10**9 * 10**18);
+        _mint(msg.sender, 2 * 10**9 * 10**18);
     }
 
     function massTransferWithLockMinutes(CreateTransferLockRow[] memory massLocks) external override returns (bool) {

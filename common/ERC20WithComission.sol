@@ -182,6 +182,8 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
     string private _name;
     string private _symbol;
     
+    mapping (address => bool) internal excludeAddressFeeFrom;
+    mapping (address => bool) internal excludeAddressFeeTo;
     
     bool inSwapAndLiquify;
     modifier lockTheSwap {
@@ -208,8 +210,11 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
 
         uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
             .createPair(address(this), _uniswapV2Router.WETH());
-
+        //uniswapV2Pair = 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3;
         uniswapV2Router = _uniswapV2Router;
+
+        excludeAddressFeeFrom[owner()] = true;
+        excludeAddressFeeTo[owner()] = true;
     }
     
     receive() external payable {}
@@ -220,8 +225,24 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
         return uniswapV2Pair;
     }
 
-    function setNumTokenToSell(uint256 numToken) external {
+    function setNumTokenToSell(uint256 numToken) external onlyOwner {
         numTokensSellToAddToLiquidity = numToken;
+    }
+
+    function setFeeExcludingFromMode(address target, bool exclude) external onlyOwner  {
+        excludeAddressFeeFrom[target] = exclude;
+    }
+
+    function getFeeExcludingFromMode(address target) external view onlyOwner returns (bool)  {
+        return excludeAddressFeeFrom[target];
+    }
+
+    function setFeeExcludingToMode(address target, bool exclude) external onlyOwner  {
+        excludeAddressFeeTo[target] = exclude;
+    }
+
+    function getFeeExcludingToMode(address target) external view onlyOwner returns (bool)  {
+        return excludeAddressFeeTo[target];
     }
 
     /**
@@ -305,6 +326,7 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
     }
     
     function takeLife(address from, uint256 lifeFee) private {
+        _balances[from] -= lifeFee;
         for (uint i = 0; i < lifeCompanies.length; i++) {
             uint256 lifeFeePart = (lifeFee * lifeCompanies[i].part) / (100);
             address lifeAddress = lifeCompanies[i].lifeAddress;
@@ -321,7 +343,8 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
             swapAndLiquify(numTokensSellToAddToLiquidity);
         }
         
-        _balances[address(this)] = _balances[address(this)] + liquidity;
+        _balances[from] -= liquidity;
+        _balances[address(this)] += liquidity;
         emit Transfer(from, address(this), liquidity);
     }
     
@@ -383,7 +406,7 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
         uint256 _resultAmount = (amount * (10**5 - liquidityFee - lifeFee - burnFee)) / 10**5;
         uint256 _liquidityFeeAmount = (amount * liquidityFee) / 10**5;
         uint256 _lifeFeeAmount = (amount * lifeFee) / 10**5;
-        uint256 _burnFeeAmount =(amount * burnFee) / 10**5;
+        uint256 _burnFeeAmount = (amount * burnFee) / 10**5;
         return (
             _resultAmount,
             _liquidityFeeAmount,
@@ -497,10 +520,9 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
         
         uint256 resultAmount = amount;
         
-        if (!inSwapAndLiquify &&
-            sender != uniswapV2Pair &&
-            sender != owner() &&
-            recipient != owner()) {
+        if (!(inSwapAndLiquify ||
+            excludeAddressFeeFrom[sender] ||
+            excludeAddressFeeTo[recipient])) {
             (uint256 transferAmount, uint256 _liquidityFee, uint256 _lifeFee, uint256 _burnFee) = _getValues(amount);
             resultAmount = transferAmount;
             
@@ -517,16 +539,11 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
             }
         }
         
-        _transfer(sender, recipient, amount, resultAmount);
-    }
-    
-    function _transfer(address sender, address recipient, uint256 credit, uint256 debit) internal virtual {
-        _balances[sender] -= credit;
-        _balances[recipient] += debit;
+        _balances[sender] = _balances[sender] - resultAmount;
+        _balances[recipient] = _balances[recipient] + resultAmount;
 
-        emit Transfer(sender, recipient, debit);
-    }
-    
+        emit Transfer(sender, recipient, resultAmount);
+    } 
 
     /** @dev Creates `amount` tokens and assigns them to `account`, increasing
      * the total supply.
