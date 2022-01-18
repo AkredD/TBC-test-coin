@@ -23,10 +23,11 @@ abstract contract StackCore is Ownable {
     }
 
 
-    uint immutable zeroWeek;
-    mapping (uint => uint256) private stackWeekMap;
-    uint256 private currentStackValue;
-    uint private currentWeekStackSupply;
+    uint public immutable zeroWeek;
+    uint public immutable startWeekStackSupply;
+
+    mapping (uint => uint256) public stackWeekMap;
+    uint256 public currentStackValue;
     mapping (address => StackTable) private stackList;
     
 
@@ -35,13 +36,23 @@ abstract contract StackCore is Ownable {
 
     constructor() {
         zeroWeek = getCurrentEpochWeek();
-        currentWeekStackSupply = 7500 * 10**18;
+        startWeekStackSupply = 6923 * 10**18;
+    }
+
+    function getSupplyByWeek(uint week) private view returns (uint) {
+        uint yearNumber = (week - zeroWeek) / 52;
+        if (yearNumber > 4) {
+            yearNumber = 4;
+        }
+
+        return startWeekStackSupply / (2 ** (yearNumber));
     }
 
     function linkStackableToken(address stackableContractAddress) external onlyOwner {
         tblGame = IStackable(stackableContractAddress);
         emit SetStackableContractAddress(stackableContractAddress);
     }
+
 
     function getCurrentEpochWeek() public view returns (uint) {
         return fromEpochSecondToEpochWeek(block.timestamp);
@@ -57,7 +68,7 @@ abstract contract StackCore is Ownable {
 
     function getEpochPeriod() private pure returns (uint) {
         //return 60 * 60 * 24 * 7; target week
-        return 60; // minute
+        return 60 * 60; // hour
     }
 
     function addToStack(uint256 amount, address sender) internal {
@@ -89,6 +100,8 @@ abstract contract StackCore is Ownable {
         }
 
         stackList[sender].balance -= amount;
+        currentStackValue -= amount;
+
         emit RemoveFromStackable(sender, amount);
     }
 
@@ -136,13 +149,13 @@ abstract contract StackCore is Ownable {
             // if last stack - check until current week
             if (i + 1 == stackList[sender].rows.length) {
                 for (uint j = rowEpochWeek; j < currentEpochWeek; ++j) {
-                    stackResult += (currentWeekStackSupply * ((supplyStackValue * 10**9) / stackWeekMap[j])) / 10**9;
+                    stackResult += (getSupplyByWeek(rowEpochWeek) * ((supplyStackValue * 10**9) / stackWeekMap[j])) / 10**9;
                 }
             // if else - check until next addToStack week
             } else {
                 uint nextRowEpochWeek = fromEpochSecondToEpochWeek(stackList[sender].rows[i + 1].timestamp) + 1;
                 for (uint j = rowEpochWeek; j < nextRowEpochWeek && j < currentEpochWeek; ++j){
-                    stackResult += (currentWeekStackSupply * ((supplyStackValue * 10**9) / stackWeekMap[j])) / 10**9;
+                    stackResult += (getSupplyByWeek(rowEpochWeek) * ((supplyStackValue * 10**9) / stackWeekMap[j])) / 10**9;
                 }
             }
         }

@@ -1,14 +1,6 @@
 
-// File: https://github.com/AkredD/TBL-token/blob/main/common/Stackable.sol
+// File: common/Stackable.sol
 
-// File @openzeppelin/contracts/utils/Context.sol@v4.1.0
-/**
- *Submitted for verification at BscScan.com on 2021-06-09
-*/
-
-// Sources flattened with hardhat v2.2.1 https://hardhat.org
-
-// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v4.1.0
 
 
 pragma solidity ^0.8.4;
@@ -18,243 +10,8 @@ interface IStackable {
     
     event Stack(address to, uint256 value);
 }
-// File: https://github.com/AkredD/TBL-token/blob/main/util/SafeMath.sol
+// File: uniswap/IUniswapV2Factory.sol
 
-// File @openzeppelin/contracts/access/Ownable.sol@v4.1.0
-/**
- *Submitted for verification at BscScan.com on 2021-06-09
-*/
-
-// Sources flattened with hardhat v2.2.1 https://hardhat.org
-
-// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v4.1.0
-
-
-pragma solidity ^0.8.0;
-
-// CAUTION
-// This version of SafeMath should only be used with Solidity 0.8 or later,
-// because it relies on the compiler's built in overflow checks.
-
-/**
- * @dev Wrappers over Solidity's arithmetic operations.
- *
- * NOTE: `SafeMath` is no longer needed starting with Solidity 0.8. The compiler
- * now has built in overflow checking.
- */
-library SafeMath {
-    /**
-     * @dev Returns the addition of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryAdd(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        unchecked {
-            uint256 c = a + b;
-            if (c < a) return (false, 0);
-            return (true, c);
-        }
-    }
-
-    /**
-     * @dev Returns the substraction of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function trySub(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        unchecked {
-            if (b > a) return (false, 0);
-            return (true, a - b);
-        }
-    }
-
-    /**
-     * @dev Returns the multiplication of two unsigned integers, with an overflow flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryMul(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        unchecked {
-            // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
-            // benefit is lost if 'b' is also tested.
-            // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
-            if (a == 0) return (true, 0);
-            uint256 c = a * b;
-            if (c / a != b) return (false, 0);
-            return (true, c);
-        }
-    }
-
-    /**
-     * @dev Returns the division of two unsigned integers, with a division by zero flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryDiv(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        unchecked {
-            if (b == 0) return (false, 0);
-            return (true, a / b);
-        }
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers, with a division by zero flag.
-     *
-     * _Available since v3.4._
-     */
-    function tryMod(uint256 a, uint256 b) internal pure returns (bool, uint256) {
-        unchecked {
-            if (b == 0) return (false, 0);
-            return (true, a % b);
-        }
-    }
-
-    /**
-     * @dev Returns the addition of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `+` operator.
-     *
-     * Requirements:
-     *
-     * - Addition cannot overflow.
-     */
-    function add(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a + b;
-    }
-
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting on
-     * overflow (when the result is negative).
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
-    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a - b;
-    }
-
-    /**
-     * @dev Returns the multiplication of two unsigned integers, reverting on
-     * overflow.
-     *
-     * Counterpart to Solidity's `*` operator.
-     *
-     * Requirements:
-     *
-     * - Multiplication cannot overflow.
-     */
-    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a * b;
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers, reverting on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `/` operator.
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function div(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a / b;
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * reverting when dividing by zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a % b;
-    }
-
-    /**
-     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
-     * overflow (when the result is negative).
-     *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {trySub}.
-     *
-     * Counterpart to Solidity's `-` operator.
-     *
-     * Requirements:
-     *
-     * - Subtraction cannot overflow.
-     */
-    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        unchecked {
-            require(b <= a, errorMessage);
-            return a - b;
-        }
-    }
-
-    /**
-     * @dev Returns the integer division of two unsigned integers, reverting with custom message on
-     * division by zero. The result is rounded towards zero.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Counterpart to Solidity's `/` operator. Note: this function uses a
-     * `revert` opcode (which leaves remaining gas untouched) while Solidity
-     * uses an invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        unchecked {
-            require(b > 0, errorMessage);
-            return a / b;
-        }
-    }
-
-    /**
-     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
-     * reverting with custom message when dividing by zero.
-     *
-     * CAUTION: This function is deprecated because it requires allocating memory for the error
-     * message unnecessarily. For custom revert reasons use {tryMod}.
-     *
-     * Counterpart to Solidity's `%` operator. This function uses a `revert`
-     * opcode (which leaves remaining gas untouched) while Solidity uses an
-     * invalid opcode to revert (consuming all remaining gas).
-     *
-     * Requirements:
-     *
-     * - The divisor cannot be zero.
-     */
-    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
-        unchecked {
-            require(b > 0, errorMessage);
-            return a % b;
-        }
-    }
-}
-// File: https://github.com/AkredD/TBL-token/blob/main/uniswap/IUniswapV2Factory.sol
-
-/**
- *Submitted for verification at BscScan.com on 2021-06-09
-*/
-
-// Sources flattened with hardhat v2.2.1 https://hardhat.org
-
-// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v4.1.0
 
 
 pragma solidity ^0.8.4;
@@ -288,15 +45,8 @@ interface IUniswapV2Factory {
 
     function setFeeToSetter(address) external;
 }
-// File: https://github.com/AkredD/TBL-token/blob/main/uniswap/IUniswapV2Router01.sol
+// File: uniswap/IUniswapV2Router01.sol
 
-/**
- *Submitted for verification at BscScan.com on 2021-06-09
-*/
-
-// Sources flattened with hardhat v2.2.1 https://hardhat.org
-
-// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v4.1.0
 
 
 pragma solidity ^0.8.4;
@@ -459,15 +209,8 @@ interface IUniswapV2Router01 {
         view
         returns (uint256[] memory amounts);
 }
-// File: https://github.com/AkredD/TBL-token/blob/main/uniswap/IUniswapV2Router02.sol
+// File: uniswap/IUniswapV2Router02.sol
 
-/**
- *Submitted for verification at BscScan.com on 2021-06-09
-*/
-
-// Sources flattened with hardhat v2.2.1 https://hardhat.org
-
-// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v4.1.0
 
 
 pragma solidity ^0.8.4;
@@ -519,15 +262,8 @@ interface IUniswapV2Router02 is IUniswapV2Router01 {
         uint256 deadline
     ) external;
 }
-// File: https://github.com/AkredD/TBL-token/blob/main/common/Life.sol
+// File: common/Life.sol
 
-/**
- *Submitted for verification at BscScan.com on 2021-06-09
-*/
-
-// Sources flattened with hardhat v2.2.1 https://hardhat.org
-
-// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v4.1.0
 
 
 pragma solidity ^0.8.4;
@@ -544,16 +280,8 @@ interface ILife {
 
     function getLifeCompamies() external view returns (LifeRow[] memory);
 }
-// File: https://github.com/AkredD/TBL-token/blob/main/util/Context.sol
+// File: util/Context.sol
 
-// File @openzeppelin/contracts/utils/Context.sol@v4.1.0
-/**
- *Submitted for verification at BscScan.com on 2021-06-09
-*/
-
-// Sources flattened with hardhat v2.2.1 https://hardhat.org
-
-// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v4.1.0
 
 
 pragma solidity ^0.8.0;
@@ -578,16 +306,8 @@ abstract contract Context {
         return msg.data;
     }
 }
-// File: https://github.com/AkredD/TBL-token/blob/main/util/Ownable.sol
+// File: util/Ownable.sol
 
-// File @openzeppelin/contracts/access/Ownable.sol@v4.1.0
-/**
- *Submitted for verification at BscScan.com on 2021-06-09
-*/
-
-// Sources flattened with hardhat v2.2.1 https://hardhat.org
-
-// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v4.1.0
 
 
 pragma solidity ^0.8.0;
@@ -657,15 +377,179 @@ abstract contract Ownable is Context {
         _owner = newOwner;
     }
 }
-// File: https://github.com/AkredD/TBL-token/blob/main/common/Fee.sol
+// File: common/StackCore.sol
 
-/**
- *Submitted for verification at BscScan.com on 2021-06-09
-*/
 
-// Sources flattened with hardhat v2.2.1 https://hardhat.org
 
-// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v4.1.0
+pragma solidity ^0.8.4;
+
+
+
+abstract contract StackCore is Ownable {
+    event SetStackableContractAddress(address stackableContractAddress);
+    event Stack(address owner, uint256 balance, uint256 stackValue);
+    event AddToStackable(address owner, uint blockNumber, uint256 value);
+    event RemoveFromStackable(address owner, uint256 value);
+    event FixWeekPool(uint startWeekTimestamp, uint endWeekTimestamp, uint256 totalLockedSupply);
+
+
+    struct StackRow { 
+      uint timestamp;
+      uint256 amount;
+    }
+    struct StackTable {
+        uint256 balance;
+        StackRow[] rows;
+    }
+
+
+    uint public immutable zeroWeek;
+    uint public immutable startWeekStackSupply;
+
+    mapping (uint => uint256) public stackWeekMap;
+    uint256 public currentStackValue;
+    mapping (address => StackTable) private stackList;
+    
+
+    IStackable public tblGame;
+
+
+    constructor() {
+        zeroWeek = getCurrentEpochWeek();
+        startWeekStackSupply = 6923 * 10**18;
+    }
+
+    function getSupplyByWeek(uint week) private view returns (uint) {
+        uint yearNumber = (week - zeroWeek) / 52;
+        if (yearNumber > 4) {
+            yearNumber = 4;
+        }
+
+        return startWeekStackSupply / (2 ** (yearNumber));
+    }
+
+    function linkStackableToken(address stackableContractAddress) external onlyOwner {
+        tblGame = IStackable(stackableContractAddress);
+        emit SetStackableContractAddress(stackableContractAddress);
+    }
+
+
+    function getCurrentEpochWeek() public view returns (uint) {
+        return fromEpochSecondToEpochWeek(block.timestamp);
+    }
+
+    function fromEpochSecondToEpochWeek(uint timestamp) private pure returns (uint) {
+        return timestamp / getEpochPeriod();
+    }
+
+    function fromEpochWeekToTimestamp(uint epochWeek) private pure returns (uint) {
+        return epochWeek * getEpochPeriod();
+    }
+
+    function getEpochPeriod() private pure returns (uint) {
+        //return 60 * 60 * 24 * 7; target week
+        return 60 * 60; // hour
+    }
+
+    function addToStack(uint256 amount, address sender) internal {
+        tryToFillStackWeekMap();
+
+        stackList[sender].rows.push(StackRow(block.timestamp, amount));
+        currentStackValue += amount;
+
+        emit AddToStackable(sender, block.number, amount);
+    }
+
+    function removeFromStack(uint256 amount, address sender) internal {
+        tryToFillStackWeekMap();
+
+        uint256 stackBalance = stackList[sender].balance;
+        require(stackBalance >= amount, "StackableCore: transfer from stack amount exceeds stack balance");
+
+        uint256 leftAmount = amount;
+        while (leftAmount != 0) {
+            StackRow memory lastRow = stackList[sender].rows[stackList[sender].rows.length - 1];
+            stackList[sender].rows.pop();
+            if (lastRow.amount > leftAmount) {
+                lastRow.amount -= leftAmount;
+                leftAmount = 0;
+                stackList[sender].rows.push(lastRow);
+            } else {
+                leftAmount -= lastRow.amount;
+            }
+        }
+
+        stackList[sender].balance -= amount;
+        currentStackValue -= amount;
+
+        emit RemoveFromStackable(sender, amount);
+    }
+
+
+    function tryToFillStackWeekMap() internal {
+        uint currentWeek = getCurrentEpochWeek();
+
+        uint weekIndex = currentWeek - 1;
+        while(currentWeek > zeroWeek && stackWeekMap[currentWeek] == 0){
+            emit FixWeekPool(fromEpochWeekToTimestamp(weekIndex), fromEpochWeekToTimestamp(weekIndex + 1), currentStackValue);
+            stackWeekMap[weekIndex--] = currentStackValue;
+        }
+    }
+
+    
+    function triggerStack() external {
+        tryToFillStackWeekMap();
+        address sender = _msgSender();
+        
+        require(stackList[sender].balance > 0, "StackableCore: stack balance is 0");
+        
+        uint256 stackResult = evaluateTriggerStack(sender);
+
+        while(stackList[sender].rows.length != 0) {
+            stackList[sender].rows.pop(); 
+        }
+        
+        tblGame.stack(sender, stackResult);
+        emit Stack(_msgSender(), stackList[sender].balance, stackResult);
+        
+        stackList[sender].rows.push(StackRow(block.timestamp, stackList[sender].balance));
+    }
+
+    function evaluateTriggerStack(address sender) public view returns (uint256) {
+        uint256 supplyStackValue;
+        uint256 stackResult;
+
+        uint currentEpochWeek = getCurrentEpochWeek();
+
+        for (uint i = 0; i < stackList[sender].rows.length; i++) {
+            StackRow memory row = stackList[sender].rows[i];
+            uint rowEpochWeek = fromEpochSecondToEpochWeek(row.timestamp) + 1;
+            supplyStackValue += row.amount;
+
+            // if last stack - check until current week
+            if (i + 1 == stackList[sender].rows.length) {
+                for (uint j = rowEpochWeek; j < currentEpochWeek; ++j) {
+                    stackResult += (getSupplyByWeek(rowEpochWeek) * ((supplyStackValue * 10**9) / stackWeekMap[j])) / 10**9;
+                }
+            // if else - check until next addToStack week
+            } else {
+                uint nextRowEpochWeek = fromEpochSecondToEpochWeek(stackList[sender].rows[i + 1].timestamp) + 1;
+                for (uint j = rowEpochWeek; j < nextRowEpochWeek && j < currentEpochWeek; ++j){
+                    stackResult += (getSupplyByWeek(rowEpochWeek) * ((supplyStackValue * 10**9) / stackWeekMap[j])) / 10**9;
+                }
+            }
+        }
+
+        return stackResult;
+    }
+
+    function viewStack() external view returns (StackTable memory) {
+        return stackList[_msgSender()];
+    }
+
+}
+// File: common/Fee.sol
+
 
 
 pragma solidity ^0.8.4;
@@ -716,18 +600,9 @@ abstract contract Fee is Ownable, IFee {
         return _liquidityFee + _burnFee + _lifeFee <= 5 * 10**3;
     }
 }
-// File: https://github.com/AkredD/TBL-token/blob/main/common/ERC20WithComission.sol
-
-/**
- *Submitted for verification at BscScan.com on 2021-06-09
-*/
-
-// Sources flattened with hardhat v2.2.1 https://hardhat.org
-
-// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v4.1.0
+// File: common/ERC20WithComission.sol
 
 
-// File @openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol@v4.1.0
 
 
 pragma solidity ^0.8.0;
@@ -874,10 +749,7 @@ pragma solidity ^0.8.4;
 
 
 
-
-abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metadata {
-    using SafeMath for uint256;
-    
+abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metadata {    
     event MinTokensBeforeSwapUpdated(uint256 minTokensBeforeSwap);
     event SwapAndLiquify(
         uint256 tokensSwapped,
@@ -902,6 +774,8 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
     string private _name;
     string private _symbol;
     
+    mapping (address => bool) internal excludeAddressFeeFrom;
+    mapping (address => bool) internal excludeAddressFeeTo;
     
     bool inSwapAndLiquify;
     modifier lockTheSwap {
@@ -926,10 +800,13 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
         IUniswapV2Router02 _uniswapV2Router =
             IUniswapV2Router02(0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3);
 
-        uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
-            .createPair(address(this), _uniswapV2Router.WETH());
-
+        //uniswapV2Pair = IUniswapV2Factory(_uniswapV2Router.factory())
+        //    .createPair(address(this), _uniswapV2Router.WETH());
+        uniswapV2Pair = 0x9Ac64Cc6e4415144C455BD8E4837Fea55603e5c3;
         uniswapV2Router = _uniswapV2Router;
+
+        excludeAddressFeeFrom[owner()] = true;
+        excludeAddressFeeTo[owner()] = true;
     }
     
     receive() external payable {}
@@ -940,8 +817,24 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
         return uniswapV2Pair;
     }
 
-    function setNumTokenToSell(uint256 numToken) external {
+    function setNumTokenToSell(uint256 numToken) external onlyOwner {
         numTokensSellToAddToLiquidity = numToken;
+    }
+
+    function setFeeExcludingFromMode(address target, bool exclude) external onlyOwner  {
+        excludeAddressFeeFrom[target] = exclude;
+    }
+
+    function getFeeExcludingFromMode(address target) external view onlyOwner returns (bool)  {
+        return excludeAddressFeeFrom[target];
+    }
+
+    function setFeeExcludingToMode(address target, bool exclude) external onlyOwner  {
+        excludeAddressFeeTo[target] = exclude;
+    }
+
+    function getFeeExcludingToMode(address target) external view onlyOwner returns (bool)  {
+        return excludeAddressFeeTo[target];
     }
 
     /**
@@ -1025,8 +918,9 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
     }
     
     function takeLife(address from, uint256 lifeFee) private {
+        _balances[from] -= lifeFee;
         for (uint i = 0; i < lifeCompanies.length; i++) {
-            uint256 lifeFeePart = lifeFee.mul(lifeCompanies[i].part).div(100);
+            uint256 lifeFeePart = (lifeFee * lifeCompanies[i].part) / (100);
             address lifeAddress = lifeCompanies[i].lifeAddress;
             
             _balances[lifeAddress] += lifeFeePart;
@@ -1041,19 +935,20 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
             swapAndLiquify(numTokensSellToAddToLiquidity);
         }
         
-        _balances[address(this)] = _balances[address(this)] + liquidity;
+        _balances[from] -= liquidity;
+        _balances[address(this)] += liquidity;
         emit Transfer(from, address(this), liquidity);
     }
     
     function swapAndLiquify(uint256 contractTokenBalance) private lockTheSwap {
-        uint256 half = contractTokenBalance.div(2);
-        uint256 otherHalf = contractTokenBalance.sub(half);
+        uint256 half = contractTokenBalance / 2;
+        uint256 otherHalf = contractTokenBalance - half;
 
         uint256 initialBalance = address(this).balance;
 
         swapTokensForEth(half);
 
-        uint256 newBalance = address(this).balance.sub(initialBalance);
+        uint256 newBalance = address(this).balance - initialBalance;
 
         addLiquidity(otherHalf, newBalance);
 
@@ -1100,10 +995,10 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
             uint256
         )
     {
-        uint256 _resultAmount = amount.mul(10**5 - liquidityFee - lifeFee - burnFee).div(10**5);
-        uint256 _liquidityFeeAmount = amount.mul(liquidityFee).div(10**5);
-        uint256 _lifeFeeAmount = amount.mul(lifeFee).div(10**5);
-        uint256 _burnFeeAmount = amount.mul(burnFee).div(10**5);
+        uint256 _resultAmount = (amount * (10**5 - liquidityFee - lifeFee - burnFee)) / 10**5;
+        uint256 _liquidityFeeAmount = (amount * liquidityFee) / 10**5;
+        uint256 _lifeFeeAmount = (amount * lifeFee) / 10**5;
+        uint256 _burnFeeAmount = (amount * burnFee) / 10**5;
         return (
             _resultAmount,
             _liquidityFeeAmount,
@@ -1217,10 +1112,9 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
         
         uint256 resultAmount = amount;
         
-        if (!inSwapAndLiquify &&
-            sender != uniswapV2Pair &&
-            sender != owner() &&
-            recipient != owner()) {
+        if (!(inSwapAndLiquify ||
+            excludeAddressFeeFrom[sender] ||
+            excludeAddressFeeTo[recipient])) {
             (uint256 transferAmount, uint256 _liquidityFee, uint256 _lifeFee, uint256 _burnFee) = _getValues(amount);
             resultAmount = transferAmount;
             
@@ -1237,16 +1131,11 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
             }
         }
         
-        _transfer(sender, recipient, amount, resultAmount);
-    }
-    
-    function _transfer(address sender, address recipient, uint256 credit, uint256 debit) internal virtual {
-        _balances[sender] -= credit;
-        _balances[recipient] += debit;
+        _balances[sender] = _balances[sender] - resultAmount;
+        _balances[recipient] = _balances[recipient] + resultAmount;
 
-        emit Transfer(sender, recipient, debit);
-    }
-    
+        emit Transfer(sender, recipient, resultAmount);
+    } 
 
     /** @dev Creates `amount` tokens and assigns them to `account`, increasing
      * the total supply.
@@ -1310,42 +1199,8 @@ abstract contract ERC20WithComission is Context, Fee, IERC20, ILife, IERC20Metad
 }
 // File: TBLCore.sol
 
-/**
- *Submitted for verification at BscScan.com on 2021-06-09
-*/
-
-// Sources flattened with hardhat v2.2.1 https://hardhat.org
-
-// File @openzeppelin/contracts/token/ERC20/IERC20.sol@v4.1.0
 
 
-
-
-interface ICoreStackable {
-    event SetStackableContractAddress(address stackableContractAddress);
-    event Stack(address owner, uint256 balance, uint256 stackValue);
-    event AddToStackable(address owner, uint blockNumber, uint256 value);
-    event RemoveFromStackable(address owner, uint256 value);
-    
-    struct StackRow { 
-      uint blockNumber;
-      uint256 amount;
-    }
-    struct StackTable {
-        uint256 balance;
-        StackRow[] rows;
-    }
-    
-    function linkStackableToken(address stackableContractAddress) external returns (bool);
-    
-    function transferToStask(uint256 amount) external returns (bool);
-    
-    function transferFromStack(uint256 amount) external returns (bool);
-    
-    function viewStack() external view returns (StackTable memory);
-    
-    function triggerStack() external returns (bool);
-}
 
 interface ITransfereWithLock {
     event CreateTransferWithLock(address sender, address recipient, uint256 amount, uint blockTimestamp, uint blockSeconds);
@@ -1385,18 +1240,14 @@ pragma solidity ^0.8.4;
 
 
 
-contract TBLCore is ERC20WithComission, ICoreStackable, ITransfereWithLock {
+contract TBLCore is ERC20WithComission, StackCore, ITransfereWithLock {
     uint256 constant NULL = 0;
    
-    mapping (address => StackTable) private stackList;
     mapping (address => TransferLockTable) private lockedTransfers;
-    
-
-    IStackable public tblGame;
     
     
     constructor() ERC20WithComission("TinyBlastCore", "TBLC") {
-        _mint(msg.sender, 2* 10**9 * 10**18);
+        _mint(msg.sender, 2 * 10**9 * 10**18);
     }
 
     function massTransferWithLockMinutes(CreateTransferLockRow[] memory massLocks) external override returns (bool) {
@@ -1474,79 +1325,25 @@ contract TBLCore is ERC20WithComission, ICoreStackable, ITransfereWithLock {
         return unreceivedRows;
     }
     
-
-    function linkStackableToken(address stackableContractAddress) external override onlyOwner returns (bool) {
-        tblGame = IStackable(stackableContractAddress);
-        emit SetStackableContractAddress(stackableContractAddress);
-        return true;
-    }
     
     
-    function transferToStask(uint256 amount) external override returns (bool) {
+    function transferToStask(uint256 amount) external  {
         address sender = _msgSender();
         uint256 balance = balanceOf(sender);
         require(balance >= amount, "StackableCore: transfer to stack amount exceeds balance");
         
-
-        stackList[sender].rows.push(StackRow(block.number, amount));
-        stackList[sender].balance += amount;
-
+        //StackCore function
+        addToStack(amount, sender);
         
-        emit AddToStackable(sender, block.number, amount);
-        
-        _balances[sender] = balance - amount;
-        
-        return true;
+        _balances[sender] -= amount;
     }
     
-    function transferFromStack(uint256 amount) external override returns (bool) {
-        address sender = _msgSender();
-        uint256 stackBalance = stackList[sender].balance;
-        require(stackBalance >= amount, "StackableCore: transfer from stack amount exceeds stack balance");
-        
-        
-        uint256 leftAmount = amount;
-        while (leftAmount != 0) {
-            StackRow memory lastRow = stackList[sender].rows[stackList[sender].rows.length - 1];
-            stackList[sender].rows.pop();
-            if (lastRow.amount > leftAmount) {
-                lastRow.amount -= leftAmount;
-                leftAmount = 0;
-                stackList[sender].rows.push(lastRow);
-            } else {
-                leftAmount -= lastRow.amount;
-            }
-        }
-        stackList[sender].balance -= amount;
-        emit RemoveFromStackable(sender, amount);
-        
-        return true;
-    }
-    
-    function viewStack() external view override returns (StackTable memory) {
-        return stackList[_msgSender()];
-    }
-    
-    function triggerStack() external override returns (bool) {
-        uint currentBlock = block.number;
-        uint256 stackedValue = 0;
+    function transferFromStack(uint256 amount) external {
         address sender = _msgSender();
         
-        require(stackList[sender].balance > 0, "StackableCore: stack balance is 0");
-        
-        while(stackList[sender].rows.length != 0) {
-            StackRow memory lastRow = stackList[sender].rows[stackList[sender].rows.length - 1];
-            stackList[sender].rows.pop();
-            
-            // main stack logic (v0.02)
-            stackedValue += (lastRow.amount * ((uint256(currentBlock - lastRow.blockNumber) * 1000000000) / uint256(6 * 60 * 24 * 365))) / 1000000000;
-        }
-        
-        tblGame.stack(sender, stackedValue);
-        emit Stack(_msgSender(), stackList[sender].balance, stackedValue);
-        
-        stackList[sender].rows.push(StackRow(currentBlock, stackList[sender].balance));
-        return true;
-    }
+        //StackCore function
+        removeFromStack(amount, sender);
 
+        _balances[sender]+= amount;
+    }
 }
