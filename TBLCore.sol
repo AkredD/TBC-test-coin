@@ -46,7 +46,7 @@ contract TBLCore is ERC20WithComission, StackCore, ITransfereWithLock {
     mapping (address => TransferLockTable) private lockedTransfers;
     
     
-    constructor() ERC20WithComission("TinyBlastCore", "TBLC") {
+    constructor() ERC20WithComission("TINY", "TINY") {
         _mint(msg.sender, 2 * 10**9 * 10**18);
     }
 
